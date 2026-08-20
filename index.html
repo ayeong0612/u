@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>컴퓨터와 심리전</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #fff8e7;
+  color: #5b4636;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Apple SD Gothic Neo",
+    sans-serif;
+}
+
+.container {
+  width: min(750px, calc(100% - 30px));
+  margin: auto;
+  padding: 50px 0;
+}
+
+header {
+  text-align: center;
+}
+
+.icon {
+  font-size: 60px;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 8vw, 4rem);
+  margin: 5px 0;
+}
+
+.subtitle {
+  color: #806d5c;
+}
+
+.card {
+  margin-top: 30px;
+  background: #fffdf7;
+  border: 3px solid #ffe29a;
+  border-radius: 28px;
+  padding: 35px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(91,70,54,.12);
+}
+
+.score {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.score span {
+  background: #fff0b0;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 900;
+}
+
+#computer {
+  min-height: 100px;
+  font-size: 1.3rem;
+  line-height: 1.7;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+
+.choice {
+  width: 140px;
+  height: 90px;
+  border: 2px solid #efd37a;
+  border-radius: 18px;
+  background: #fff8dc;
+  color: #5b4636;
+  font-size: 2rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.choice:hover {
+  background: #ffe47b;
+  transform: translateY(-4px);
+}
+
+.result {
+  margin-top: 25px;
+  min-height: 45px;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.restart {
+  margin-top: 20px;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 28px;
+  background: #5b4636;
+  color: white;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <div class="icon">🧠</div>
+  <h1>컴퓨터와 심리전</h1>
+  <p class="subtitle">컴퓨터가 당신의 선택을 예측할 수 있을까요?</p>
+</header>
+
+<section class="card">
+
+  <div class="score">
+    <span>나: <b id="playerScore">0</b></span>
+    <span>컴퓨터: <b id="computerScore">0</b></span>
+  </div>
+
+  <div id="computer">
+    <strong>왼쪽, 가운데, 오른쪽 중 하나를 생각하세요.</strong>
+    <br>
+    하지만 아직 클릭하지 마세요...
+  </div>
+
+  <div class="buttons">
+    <button class="choice" onclick="choose(0)">⬅️</button>
+    <button class="choice" onclick="choose(1)">⬆️</button>
+    <button class="choice" onclick="choose(2)">➡️</button>
+  </div>
+
+  <div id="result" class="result"></div>
+
+  <button class="restart" onclick="resetGame()">
+    🔄 다시 하기
+  </button>
+
+</section>
+
+</div>
+
+<script>
+let playerScore = 0;
+let computerScore = 0;
+
+let history = [];
+
+const names = [
+  "왼쪽",
+  "가운데",
+  "오른쪽"
+];
+
+const computer = document.getElementById("computer");
+const result = document.getElementById("result");
+
+function choose(playerChoice) {
+
+  /*
+    처음에는 랜덤으로 예측하지만,
+    플레이어의 선택 기록이 쌓이면
+    가장 많이 선택한 위치를 예측합니다.
+  */
+
+  let prediction;
+
+  if(history.length < 3) {
+
+    prediction =
+      Math.floor(Math.random() * 3);
+
+  } else {
+
+    const counts = [0, 0, 0];
+
+    history.forEach(choice => {
+      counts[choice]++;
+    });
+
+    prediction =
+      counts.indexOf(Math.max(...counts));
+  }
+
+  computer.innerHTML = `
+    🤖 컴퓨터:
+    <strong>
+      당신은 ${names[prediction]}을(를)
+      고를 것 같았어요.
+    </strong>
+  `;
+
+  history.push(playerChoice);
+
+  if(playerChoice === prediction) {
+
+    computerScore++;
+
+    result.innerHTML =
+      `😈 예측 성공!<br>
+       컴퓨터가 당신의 생각을 읽었습니다.`;
+
+  } else {
+
+    playerScore++;
+
+    result.innerHTML =
+      `🎉 당신의 승리!<br>
+       컴퓨터의 예측을 피했습니다.`;
+  }
+
+  document.getElementById("playerScore").textContent =
+    playerScore;
+
+  document.getElementById("computerScore").textContent =
+    computerScore;
+}
+
+function resetGame() {
+
+  playerScore = 0;
+  computerScore = 0;
+  history = [];
+
+  document.getElementById("playerScore").textContent = 0;
+  document.getElementById("computerScore").textContent = 0;
+
+  computer.innerHTML = `
+    <strong>
+      왼쪽, 가운데, 오른쪽 중 하나를 생각하세요.
+    </strong>
+    <br>
+    하지만 아직 클릭하지 마세요...
+  `;
+
+  result.textContent = "";
+}
+</script>
+
+</body>
+</html>
